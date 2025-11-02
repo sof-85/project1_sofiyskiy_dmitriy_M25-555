@@ -1,5 +1,7 @@
-from constants import ROOMS
 import math
+
+from constants import COMMANDS, ROOMS
+
 #from main import *
 
 def describe_current_room(game_state):
@@ -29,15 +31,18 @@ def solve_puzzle(game_state):
     from player_actions import get_input
     room = game_state['current_room']
     room_puzzle = ROOMS[room]['puzzle']
-    if (room_puzzle != []):
+    if (room_puzzle is not None):
         print(room_puzzle[0])
-        answer = get_input(prompt="Ваш ответ: ")
+        init_answer = get_input(prompt="Ваш ответ: ")
+        answer = alt_answer(room, init_answer)
         if (answer == room_puzzle[1]):
             print('Правильно! Загадка решена!')
             ROOMS[room]['puzzle'] = None
             #Добавить награду
         else:
-            print('Неверно. Попробуйте снова')    
+            print('Неверно. Попробуйте снова')
+            if (room == 'trap_room'):
+                trigger_trap(game_state)    
         
     else:
         print ('Здесь загадок нет.')
@@ -54,6 +59,7 @@ def attempt_open_treasure(game_state):
         ROOMS[room]['items'].remove('treasure_key')
         print ("В сундуке сокровище! Вы победили!")
         game_over= True
+        return
     else:
         print ('Сундук заперт. ...Ввести код? (да/нет)')
         answer = get_input()
@@ -63,14 +69,29 @@ def attempt_open_treasure(game_state):
             if (code == ROOMS[room]['puzzle'][1]):
                 print ("В сундуке сокровище! Вы победили!")
                 game_over= True
+                return
             else:
                 print('Код неверный')
+                return
         elif (answer == 'нет'):
             print('Вы отступаете от сундука')
+            return
+        else:
+            print('Ответ должен быть \'да\' или \'нет\'')
+            print('Вы отступаете от сундука')
+            return
             
 
-def show_help():
+def show_help(default = COMMANDS):
     '''Функция помощи'''
+    print("\nДоступные команды:")
+    for i in COMMANDS:
+        print(f"{i:<16}{COMMANDS.get(i)}")
+
+
+'''
+def show_help():
+    Старая функция помощи
     print("\nДоступные команды:")
     print("  go <direction>  - перейти в направлении (north/south/east/west)")
     print("  look            - осмотреть текущую комнату")
@@ -80,7 +101,7 @@ def show_help():
     print("  solve           - попытаться решить загадку в комнате")
     print("  quit            - выйти из игры")
     print("  help            - показать это сообщение")
-
+'''
 def pseudo_random(seed, modulo):
     '''Функция  случайности'''
     init_rnd = math.sin(seed*12.9898)
@@ -109,6 +130,7 @@ def trigger_trap(game_state):
             print("Вы уцелели!")
                 
 def random_event(game_state):
+    '''Функция реализации случайного события'''
     seed = game_state['steps_taken']
     
     room = game_state['current_room']
@@ -127,14 +149,38 @@ def random_event(game_state):
                 if ('sword' in game_state['player_inventory']):
                     print('Вы отпугнули существо')
             case 2:
-                if (room == 'trap_room') and ('torch' not in game_state['player_inventory']):
+                if (room == 'trap_room') and \
+                    ('torch' not in game_state['player_inventory']):
                     print ('Здесь опасно!')
                     trigger_trap(game_state)
                
-'''
-game_state = {
-        'player_inventory': [], # Инвентарь игрока
-        'current_room': 'entrance', # Текущая комната
-        'game_over': False, # Значения окончания игры
-        'steps_taken': 0 # Количество шагов
-}'''
+def alt_answer (room, answer):
+    '''Функция поддержки альтернативных ответов'''
+    match room:
+        case 'treasure_room':
+            answer = answer.lower()
+            if (answer in ['10','десять']):
+                return '10'
+            else:
+                return answer
+        case 'hall':
+            answer = answer.lower()
+            #print(answer)
+            #print(answer in ['10','десять'])
+            if (answer in ['10','десять']):
+                return '10'
+            else:
+                return answer            
+        case 'trap_room':
+            answer = answer.lower()
+            return answer            
+        case 'hall':
+            answer = answer.lower()
+            return answer            
+        case 'library':
+            answer = answer.lower()
+            return answer
+        case _:
+            return answer
+
+

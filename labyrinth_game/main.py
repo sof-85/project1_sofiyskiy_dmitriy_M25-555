@@ -8,15 +8,16 @@ game_over = False
 
 #Переменная состояния игрока
 game_state = {
-        'player_inventory': [], # Инвентарь игрока
-        'current_room': 'entrance', # Текущая комната
-        'game_over': False, # Значения окончания игры
-        'steps_taken': 0 # Количество шагов
+        'player_inventory': [],         # Инвентарь игрока
+        'current_room': 'entrance',     # Текущая комната
+        'game_over': False,             # Значения окончания игры
+        'steps_taken': 0                # Количество шагов
 }
   
 def process_command(game_state, command):
+    '''Функция обработки команд'''
     global game_over
-    print(command)
+    #print(command)
     command_seq = command.split()
     #print(len(command_seq))
 
@@ -31,6 +32,7 @@ def process_command(game_state, command):
             case 'take':
                 take_item(game_state, subject)
             case _:
+                
                 show_help()    
     elif(len(command_seq) == 1):
         action = command_seq[0]
@@ -49,7 +51,10 @@ def process_command(game_state, command):
                 else:
                     solve_puzzle(game_state)
             case _:
-                show_help()
+                if (check_direction(action) is True):
+                    move_player(game_state, action)
+                else:
+                    show_help()
     else:
         show_help()
         return  
@@ -64,7 +69,17 @@ def main():
         command = get_input()
         #game_state['steps_taken'] = +1
         process_command(game_state, command)
-  
+ 
+def check_direction(command):
+    '''Функция проверки ввода направления'''
+    #print(command)
+    if command in ['north', 'south', 'east', 'west']:
+        return True
+    else:
+        return False
+        
+        
+     
 
 if __name__=='__main__':
     
