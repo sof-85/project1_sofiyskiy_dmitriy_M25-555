@@ -1,5 +1,5 @@
 from constants import ROOMS
-
+import math
 #from main import *
 
 def describe_current_room(game_state):
@@ -49,7 +49,7 @@ def attempt_open_treasure(game_state):
     from player_actions import get_input
     room = game_state['current_room']
     global game_over
-    if 'treasure_key' in game_state['player_inventory']:
+    if ('treasure_key' in game_state['player_inventory']) and (room == 'treasuse_room'):
         print ("Вы применяете ключ, и замок щёлкает. Сундук открыт!")
         ROOMS[room]['items'].remove('treasure_key')
         print ("В сундуке сокровище! Вы победили!")
@@ -70,6 +70,7 @@ def attempt_open_treasure(game_state):
             
 
 def show_help():
+    '''Функция помощи'''
     print("\nДоступные команды:")
     print("  go <direction>  - перейти в направлении (north/south/east/west)")
     print("  look            - осмотреть текущую комнату")
@@ -80,27 +81,60 @@ def show_help():
     print("  quit            - выйти из игры")
     print("  help            - показать это сообщение")
 
+def pseudo_random(seed, modulo):
+    '''Функция  случайности'''
+    init_rnd = math.sin(seed*12.9898)
+    imp_rnd = init_rnd * 43758.5453
+    next_rnd = imp_rnd - math.floor(imp_rnd)
+    fin_rnd = int(next_rnd*modulo)
+    return fin_rnd
+
+def trigger_trap(game_state):
+    global game_over
+    print ("Ловушка активирована! Пол стал дрожать...")
+    if (game_state['player_inventory'] != []):
+        modulo = len(game_state['player_inventory'])
+        seed = game_state['steps_taken']
+        lost_item = pseudo_random(seed, modulo)
+        print('Вы потеряли ', game_state['player_inventory'][lost_item],'!')
+        game_state['player_inventory'].extend(game_state['player_inventory'][lost_item])
+    else:
+        seed = game_state['steps_taken']
+        damage = pseudo_random(seed, 9)
+        if (damage < 3):
+            print('Вы навсегда остались пленником Лабиринта!')
+            print('Игра проиграна!')
+            game_over = True
+        else:
+            print("Вы уцелели!")
+                
+def random_event(game_state):
+    seed = game_state['steps_taken']
+    
+    room = game_state['current_room']
+    
+    is_exist =  pseudo_random(seed, 10)
+    
+    if (is_exist > 0):
+        scn = pseudo_random(seed, 3)
+        
+        match scn:
+            case 0:
+                ROOMS[room]['items'].append('coin')
+                print('Вы видите на полу комнаты монетку')
+            case 1:
+                print('Вы слышите пугающий шорох в углу комнаты')
+                if ('sword' in game_state['player_inventory']):
+                    print('Вы отпугнули существо')
+            case 2:
+                if (room == 'trap_room') and ('torch' not in game_state['player_inventory']):
+                    print ('Здесь опасно!')
+                    trigger_trap(game_state)
+               
 '''
 game_state = {
         'player_inventory': [], # Инвентарь игрока
         'current_room': 'entrance', # Текущая комната
         'game_over': False, # Значения окончания игры
         'steps_taken': 0 # Количество шагов
-}
-
-
-game_state['current_room'] = 'library'
-solve_puzzle(game_state)
-
-#room = ROOMS[game_state['current_room']]
-#room = game_state['current_room']
-#room_features = ROOMS[room]
-#print(room_features['items'] != [])
-#print('Заметные предметы:', room_features['items'])
-
-#describe_current_room(game_state)
-
-if __name__=='__main__':
-    describe_current_room(game_state)
-'''
-
+}'''

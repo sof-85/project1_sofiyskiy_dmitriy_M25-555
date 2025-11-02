@@ -62,10 +62,11 @@ def main():
     describe_current_room(game_state)
     while(not game_over):
         command = get_input()
-        game_state['steps_taken'] = +1
+        #game_state['steps_taken'] = +1
         process_command(game_state, command)
   
 
 if __name__=='__main__':
     
     main()
+ 

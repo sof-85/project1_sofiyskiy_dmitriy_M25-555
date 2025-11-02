@@ -23,13 +23,18 @@ def get_input(prompt="> "):
     
 def move_player(game_state, direction):
     '''Функция перемещения'''
-    from utils import describe_current_room
+    from utils import describe_current_room, random_event
     room = game_state['current_room']
     room_exits = ROOMS[room]['exits']
+    
     if (direction in room_exits):
         game_state['current_room'] = room_exits[direction]
         game_state['steps_taken'] += 1
+        print ('число шагов', game_state['steps_taken'])
+        #random_event(game_state)
+        print(game_state['steps_taken'])
         describe_current_room(game_state)
+        random_event(game_state)
                
     else:
         print('Нельзя пойти в этом направлении')
