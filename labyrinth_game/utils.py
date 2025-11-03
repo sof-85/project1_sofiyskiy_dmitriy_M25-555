@@ -1,6 +1,8 @@
 import math
 
-from labyrinth_game.constants import COMMANDS, ROOMS
+from labyrinth_game.constants \
+import COMMANDS, ROOMS, NON_CRITICAL_DAMAGE, MAX_DAMAGE, EVENT_PROBABILITY, \
+NUM_SCENARIO, DIG_RND_FIRST,DIG_RND_SECOND
 
 
 def describe_current_room(game_state):
@@ -104,8 +106,9 @@ def show_help():
 '''
 def pseudo_random(seed, modulo):
     '''Функция  случайности'''
-    init_rnd = math.sin(seed*12.9898)
-    imp_rnd = init_rnd * 43758.5453
+    
+    init_rnd = math.sin(seed*DIG_RND_FIRST)
+    imp_rnd = init_rnd * DIG_RND_SECOND
     next_rnd = imp_rnd - math.floor(imp_rnd)
     fin_rnd = int(next_rnd*modulo)
     return fin_rnd
@@ -121,8 +124,8 @@ def trigger_trap(game_state):
         game_state['player_inventory'].extend(game_state['player_inventory'][lost_item])
     else:
         seed = game_state['steps_taken']
-        damage = pseudo_random(seed, 9)
-        if (damage < 3):
+        damage = pseudo_random(seed, MAX_DAMAGE)
+        if (damage < NON_CRITICAL_DAMAGE):
             print('Вы навсегда остались пленником Лабиринта!')
             print('Игра проиграна!')
             game_over = True
@@ -135,10 +138,10 @@ def random_event(game_state):
     
     room = game_state['current_room']
     
-    is_exist =  pseudo_random(seed, 10)
+    is_exist =  pseudo_random(seed, EVENT_PROBABILITY)
     
     if (is_exist > 0):
-        scn = pseudo_random(seed, 3)
+        scn = pseudo_random(seed, NUM_SCENARIO)
         
         match scn:
             case 0:
@@ -165,8 +168,6 @@ def alt_answer (room, answer):
                 return answer
         case 'hall':
             answer = answer.lower()
-            #print(answer)
-            #print(answer in ['10','десять'])
             if (answer in ['10','десять']):
                 return '10'
             else:

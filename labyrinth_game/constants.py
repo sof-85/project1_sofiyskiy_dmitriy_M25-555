@@ -60,3 +60,11 @@ COMMANDS = {
 "quit"          :"выйти из игры",
 "help"          :"показать это сообщение"
 }
+
+NON_CRITICAL_DAMAGE = 3
+MAX_DAMAGE = 9
+EVENT_PROBABILITY = 10
+NUM_SCENARIO = 3
+DIG_RND_FIRST = 12.9898
+DIG_RND_SECOND = 43758.5453
+
