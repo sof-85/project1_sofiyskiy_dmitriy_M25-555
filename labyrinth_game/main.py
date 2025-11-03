@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
+from labyrinth_game.player_actions import get_input, move_player, show_inventory, take_item, use_item
+from labyrinth_game.utils import attempt_open_treasure, describe_current_room, show_help, solve_puzzle
 
-#from constants import ROOMS
-from player_actions import get_input, move_player, show_inventory, take_item, use_item
-from utils import attempt_open_treasure, describe_current_room, show_help, solve_puzzle
-
-game_over = False
+#global game_over
+#game_over = False
 
 #Переменная состояния игрока
 game_state = {
@@ -17,10 +16,8 @@ game_state = {
 def process_command(game_state, command):
     '''Функция обработки команд'''
     global game_over
-    #print(command)
     command_seq = command.split()
-    #print(len(command_seq))
-
+    
     if (len(command_seq) == 2):
         action = command_seq[0]
         subject = command_seq[1]
@@ -42,43 +39,43 @@ def process_command(game_state, command):
             case 'inventory':
                 show_inventory(game_state)
             case 'quit':
-                game_over = True
+                game_state['game_over'] = True
             case 'exit':
-                game_over = True
+                game_state['game_over'] = True
             case 'solve':
                 if (game_state['current_room'] == 'treasure_room'):
                     attempt_open_treasure(game_state)
+                    
                 else:
                     solve_puzzle(game_state)
             case _:
                 if (check_direction(action) is True):
                     move_player(game_state, action)
                 else:
+                    print("Неправильная команда")
                     show_help()
     else:
+        print("Неправильная команда")
         show_help()
         return  
 
 def main():
     '''    Точка входа в игру    '''
     print('Добро пожаловать в Лабиринт сокровищ!')
-    #from player_actions import  get_input
-    #from utils import describe_current_room
     describe_current_room(game_state)
-    while(not game_over):
+    while(not game_state['game_over']):
         command = get_input()
-        #game_state['steps_taken'] = +1
         process_command(game_state, command)
+        
  
 def check_direction(command):
     '''Функция проверки ввода направления'''
-    #print(command)
     if command in ['north', 'south', 'east', 'west']:
         return True
     else:
         return False
-        
-        
+     
+     
      
 
 if __name__=='__main__':

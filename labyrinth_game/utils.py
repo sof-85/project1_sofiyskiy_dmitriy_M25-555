@@ -1,8 +1,7 @@
 import math
 
-from constants import COMMANDS, ROOMS
+from labyrinth_game.constants import COMMANDS, ROOMS
 
-#from main import *
 
 def describe_current_room(game_state):
     '''Функция описания комнаты'''
@@ -15,20 +14,15 @@ def describe_current_room(game_state):
     
     if (room_features['items'] != []):
         print ('Заметные предметы:', room_features['items'])
-    else:
-        pass
     
     print ('Выходы:', room_features['exits'])
     
     if (room_features['puzzle'] is not None):
         print ("Кажется, здесь есть загадка (используйте команду solve).")
-    else:
-        pass
-
 
 def solve_puzzle(game_state):
     '''Функция решения загадок'''
-    from player_actions import get_input
+    from labyrinth_game.player_actions import get_input
     room = game_state['current_room']
     room_puzzle = ROOMS[room]['puzzle']
     if (room_puzzle is not None):
@@ -38,9 +32,12 @@ def solve_puzzle(game_state):
         if (answer == room_puzzle[1]):
             print('Правильно! Загадка решена!')
             ROOMS[room]['puzzle'] = None
-            #Добавить награду
+            reward = give_reward(room)
+            print('Вы получаете:', reward)
+            game_state['player_inventory'].append(reward)
         else:
             print('Неверно. Попробуйте снова')
+            print('Для этого еще раз наберите команду solve')
             if (room == 'trap_room'):
                 trigger_trap(game_state)    
         
@@ -51,14 +48,16 @@ def solve_puzzle(game_state):
 
 def attempt_open_treasure(game_state):
     '''Реализация логики победы'''
-    from player_actions import get_input
+    from labyrinth_game.player_actions import get_input
     room = game_state['current_room']
     global game_over
-    if ('treasure_key' in game_state['player_inventory']) and (room == 'treasuse_room'):
+
+    
+    if (('treasure_key' in game_state['player_inventory']) and (room == 'treasure_room')):
         print ("Вы применяете ключ, и замок щёлкает. Сундук открыт!")
-        ROOMS[room]['items'].remove('treasure_key')
+        game_state['player_inventory'].remove('treasure_key')
         print ("В сундуке сокровище! Вы победили!")
-        game_over= True
+        game_state['game_over'] = True
         return
     else:
         print ('Сундук заперт. ...Ввести код? (да/нет)')
@@ -68,10 +67,11 @@ def attempt_open_treasure(game_state):
             code = get_input()
             if (code == ROOMS[room]['puzzle'][1]):
                 print ("В сундуке сокровище! Вы победили!")
-                game_over= True
+                game_state['game_over'] = True
                 return
             else:
                 print('Код неверный')
+                print('Для повторной попытки используйте команду solve')
                 return
         elif (answer == 'нет'):
             print('Вы отступаете от сундука')
@@ -182,5 +182,16 @@ def alt_answer (room, answer):
             return answer
         case _:
             return answer
+        
+def give_reward(room):
+    match room:
+        case 'hall':
+            return 'coin'
+        case 'trap_room':
+            return 'treasure_key'
+        case 'library':
+            return 'book'
+        case 'treasure_room':
+            return 'piece of gold'
 
 
